@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ShieldCheck,
   HeartHandshake,
@@ -17,7 +17,7 @@ import {
   Send,
   AlertCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { translations } from './i18n';
 
 // Logo component using the original image
@@ -34,6 +34,7 @@ const Logo = ({ isDarkBg = false }) => (
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEnglish, setIsEnglish] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -48,6 +49,10 @@ export default function App() {
   const t = isEnglish ? translations.en : translations.es;
 
   const handleLanguageToggle = () => setIsEnglish(!isEnglish);
+
+  useEffect(() => {
+    document.documentElement.lang = isEnglish ? 'en' : 'es';
+  }, [isEnglish]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +97,9 @@ export default function App() {
   };
 
   const openWhatsAppAlternative = () => {
-    const text = `Hola Jade Insurance, me gustaría obtener una cotización.`;
+    const text = isEnglish
+      ? `Hello Jade Insurance, I'd like a free coverage analysis.`
+      : `Hola Jade Insurance, me gustaría una asesoría gratuita para mi seguro médico.`;
     const encodedText = encodeURIComponent(text);
     window.open(`https://wa.me/17865781797?text=${encodedText}`, '_blank');
   };
@@ -124,7 +131,7 @@ export default function App() {
                   <PhoneCall className="w-4 h-4" />
                   (786) 578-1797
                 </a>
-                <a href="#cotizacion" className="bg-jade-primary hover:bg-jade-primary-dark text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md transition-all hover:shadow-lg active:scale-95">
+                <a href="#cotizacion" className="bg-jade-primary hover:bg-jade-primary-dark text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-95">
                   {t.nav.freeQuote}
                 </a>
               </div>
@@ -134,14 +141,15 @@ export default function App() {
             <div className="md:hidden flex items-center gap-2">
               <button
                 onClick={handleLanguageToggle}
-                className="flex items-center justify-center gap-1 bg-slate-100 text-slate-700 px-2.5 py-1.5 rounded-full text-xs font-bold"
+                className="flex items-center justify-center gap-1 bg-slate-50 border border-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
               >
                 <Globe className="w-3.5 h-3.5" />
                 {isEnglish ? 'ES' : 'EN'}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-slate-600 hover:text-jade-primary p-2"
+                aria-label={isMobileMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
+                className="text-slate-600 hover:text-jade-primary p-2 bg-slate-50 border border-slate-200 rounded-lg shadow-sm"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -196,18 +204,22 @@ export default function App() {
                   {t.hero.subtitle}
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                  <a href="#cotizacion" className="bg-jade-accent hover:bg-jade-accent-hover text-slate-900 px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-jade-accent/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                  <a href="#cotizacion" className="bg-jade-accent hover:bg-jade-accent-hover text-slate-900 px-8 py-3.5 rounded-lg font-semibold text-base shadow-md shadow-jade-accent/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
                     {t.hero.ctaQuote}
                     <Zap className="w-5 h-5" />
                   </a>
-                  <a href="https://wa.me/17865781797" target="_blank" rel="noreferrer" className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-200 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                  <a href="https://wa.me/17865781797" target="_blank" rel="noreferrer" className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-3.5 rounded-lg font-semibold text-base shadow-md shadow-green-200 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
                     <MessageCircle className="w-5 h-5" />
                     {t.hero.ctaWhatsapp}
                   </a>
                 </div>
+                <p className="text-xs text-slate-500 mb-10 font-medium flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  {isEnglish ? '100% Free Consultation. No commitment required.' : 'Asesoría 100% gratuita. Sin compromisos ni letras pequeñas.'}
+                </p>
 
-                <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 font-medium">
+                <div className="flex flex-wrap items-center gap-6 text-sm text-slate-600 font-semibold">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-jade-secondary" />
                     {t.hero.check1}
@@ -232,9 +244,9 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-jade-primary/20 to-jade-secondary/20 rounded-[2.5rem] transform rotate-3 scale-105 blur-lg" />
                 <div className="relative bg-white p-2 rounded-[2.5rem] shadow-2xl border border-slate-100">
                   <img
-                    src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2070&auto=format&fit=crop"
-                    alt="Familia feliz"
-                    className="rounded-[2rem] w-full h-auto object-cover aspect-[4/5]"
+                    src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1974&auto=format&fit=crop"
+                    alt="Agente asesorando"
+                    className="rounded-[2rem] w-full h-auto object-cover aspect-[4/5] object-center"
                     referrerPolicy="no-referrer"
                   />
 
@@ -259,31 +271,55 @@ export default function App() {
         </section>
 
         {/* Logos Section */}
-        <section className="py-12 border-y border-slate-200 bg-slate-50">
+        <section className="py-14 border-y border-slate-200 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
-              <p className="text-sm font-bold text-jade-primary uppercase tracking-widest">{t.logos.title}</p>
+              <p className="text-sm font-bold text-jade-primary uppercase tracking-widest mb-1">{t.logos.title}</p>
+              <div className="w-12 h-0.5 bg-jade-accent mx-auto mt-3 rounded-full" />
             </div>
 
-            <div className="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-24 opacity-80 hover:opacity-100 transition-all duration-300">
-              {/* Medical Providers */}
+            <div className="flex flex-col gap-10">
+              {/* Medical / Health Providers */}
               <div className="flex flex-col items-center">
-                <span className="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-wider">{t.logos.medical}</span>
-                <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-                  <div className="text-xl font-bold text-blue-600 flex items-center">Florida Blue</div>
-                  <div className="text-xl font-bold text-indigo-900 flex items-center">Oscar</div>
-                  <div className="text-xl font-bold text-pink-600 flex items-center">Ambetter</div>
-                  <div className="text-xl font-bold text-blue-800 flex items-center">UnitedHealthcare</div>
-                  <div className="text-xl font-bold text-teal-600 flex items-center">Molina Healthcare</div>
+                <span className="text-xs font-semibold text-slate-400 mb-6 uppercase tracking-wider">{t.logos.medical}</span>
+                <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                  {[
+                    { src: '/logos/florida-blue.png', alt: 'Florida Blue' },
+                    { src: '/logos/oscar.png', alt: 'Oscar' },
+                    { src: '/logos/ambetter.png', alt: 'Ambetter Health' },
+                    { src: '/logos/unitedhealthcare.png', alt: 'UnitedHealthcare' },
+                    { src: '/logos/molina.png', alt: 'Molina Healthcare' },
+                    { src: '/logos/amerihealth.png', alt: 'AmeriHealth Caritas' },
+                  ].map((logo) => (
+                    <img
+                      key={logo.alt}
+                      src={logo.src}
+                      alt={logo.alt}
+                      loading="lazy"
+                      className="h-9 md:h-11 w-auto object-contain opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                    />
+                  ))}
                 </div>
               </div>
 
+              <div className="border-t border-slate-200 max-w-xs mx-auto w-full" />
+
               {/* Dental Providers */}
-              <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-slate-200 pt-8 md:pt-0 md:pl-24">
-                <span className="text-xs font-semibold text-slate-400 mb-4 uppercase tracking-wider">{t.logos.dental}</span>
-                <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-                  <div className="text-xl font-bold text-blue-900 flex items-center">Ameritas</div>
-                  <div className="text-xl font-bold text-green-700 flex items-center">Cigna Dental</div>
+              <div className="flex flex-col items-center">
+                <span className="text-xs font-semibold text-slate-400 mb-6 uppercase tracking-wider">{t.logos.dental}</span>
+                <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16">
+                  {[
+                    { src: '/logos/ameritas.png', alt: 'Ameritas' },
+                    { src: '/logos/cigna.png', alt: 'Cigna Healthcare' },
+                  ].map((logo) => (
+                    <img
+                      key={logo.alt}
+                      src={logo.src}
+                      alt={logo.alt}
+                      loading="lazy"
+                      className="h-9 md:h-11 w-auto object-contain opacity-70 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -300,17 +336,22 @@ export default function App() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
-                { icon: <ShieldCheck className="w-8 h-8 text-jade-primary" /> },
-                { icon: <HeartHandshake className="w-8 h-8 text-jade-secondary" /> },
-                { icon: <CheckCircle2 className="w-8 h-8 text-jade-accent" /> },
-                { icon: <PiggyBank className="w-8 h-8 text-jade-primary" /> }
+                { icon: <ShieldCheck className="w-8 h-8 text-jade-primary" />, accent: 'bg-jade-primary' },
+                { icon: <HeartHandshake className="w-8 h-8 text-jade-secondary" />, accent: 'bg-jade-secondary' },
+                { icon: <CheckCircle2 className="w-8 h-8 text-jade-accent" />, accent: 'bg-jade-accent' },
+                { icon: <PiggyBank className="w-8 h-8 text-jade-primary" />, accent: 'bg-jade-primary' }
               ].map((iconData, idx) => (
                 <motion.div
                   key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
                   whileHover={{ y: -5 }}
-                  className="bg-slate-50 rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-all"
+                  className="group bg-slate-50 rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-lg transition-all relative overflow-hidden"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 border border-slate-100">
+                  <div className={`absolute top-0 left-0 right-0 h-1 ${iconData.accent} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  <div className="w-14 h-14 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 border border-slate-100 group-hover:shadow-md transition-shadow">
                     {iconData.icon}
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-3">{t.services.items[idx].title}</h3>
@@ -336,13 +377,20 @@ export default function App() {
               <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-700" />
 
               {t.howItWorks.steps.map((item, idx) => (
-                <div key={idx} className="relative text-center">
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: idx * 0.15 }}
+                  className="relative text-center"
+                >
                   <div className="w-24 h-24 mx-auto bg-jade-primary rounded-full flex items-center justify-center text-3xl font-bold border-8 border-slate-900 relative z-10 shadow-xl">
                     {idx + 1}
                   </div>
                   <h3 className="text-2xl font-bold mt-8 mb-4">{item.title}</h3>
                   <p className="text-slate-400 leading-relaxed">{item.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -362,6 +410,51 @@ export default function App() {
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 bg-white">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 font-serif">{t.faq.title}</h2>
+              <p className="text-lg text-slate-600">{t.faq.subtitle}</p>
+            </div>
+
+            <div className="space-y-4">
+              {t.faq.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50 hover:border-jade-primary/30 transition-colors"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                    className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
+                    aria-expanded={openFaqIndex === idx}
+                  >
+                    <span className="font-semibold text-slate-900 text-base">{item.q}</span>
+                    <span className={`flex-shrink-0 w-6 h-6 rounded-full bg-jade-primary/10 text-jade-primary flex items-center justify-center transition-transform duration-300 ${openFaqIndex === idx ? 'rotate-45' : ''}`}>
+                      +
+                    </span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {openFaqIndex === idx && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 pb-5">
+                          <p className="text-slate-600 leading-relaxed border-t border-slate-200 pt-4">{item.a}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -392,7 +485,7 @@ export default function App() {
                         onClick={() => setSubmitStatus('idle')}
                         className="text-emerald-600 font-bold hover:text-emerald-800 transition-colors"
                       >
-                        Enviar otro mensaje
+                        {t.form.sendAnother}
                       </button>
                     </div>
                   ) : (
@@ -484,7 +577,7 @@ export default function App() {
 
                         <div className="relative flex items-center py-2">
                           <div className="flex-grow border-t border-slate-200"></div>
-                          <span className="flex-shrink-0 mx-4 text-slate-400 text-sm font-medium">O</span>
+                          <span className="flex-shrink-0 mx-4 text-slate-400 text-sm font-medium">{t.form.or}</span>
                           <div className="flex-grow border-t border-slate-200"></div>
                         </div>
 
@@ -586,6 +679,16 @@ export default function App() {
           </div>
         </div>
       </footer>
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/17865781797"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="WhatsApp"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20bd5a] text-white w-14 h-14 rounded-full shadow-lg shadow-green-900/20 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+      >
+        <MessageCircle className="w-7 h-7" />
+      </a>
     </div>
   );
 }
